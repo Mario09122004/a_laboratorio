@@ -21,7 +21,7 @@ const tiposDeAnalisis = ["Hematología clínica", "Perfil de rutina", "Química 
 const formSchema = z.object({
   nombre: z.string().min(1, { message: "El nombre es requerido." }),
   descripcion: z.string().optional(),
-  Tipo: z.enum(tiposDeAnalisis, { required_error: "Debe seleccionar un tipo de análisis." }),
+  Tipo: z.enum(tiposDeAnalisis, { message: "Debe seleccionar un tipo de análisis." }),
   Campos: z.array(z.object({
       nombre: z.string().min(1, { message: "Requerido" }),
       medicion: z.string().min(1, { message: "Requerido" }),

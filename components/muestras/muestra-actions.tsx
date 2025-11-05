@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Doc, Id } from "@/convex/_generated/dataModel";
@@ -43,17 +43,22 @@ export function MuestraActions({ muestra }: MuestraActionsProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   const estados = useQuery(api.estadosMuestra.getEstadosMuestra);
 
   const updateMuestra = useMutation(api.muestras.updateMuestra);
   const deleteMuestra = useMutation(api.muestras.deleteMuestra);
 
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       estado: muestra.estado,
-      resultados: muestra.resultados.map(r => ({ ...r, valor: r.valor ?? '' })),
+      resultados: (muestra.resultados ?? []).map(r => ({ ...r, valor: r.valor === null || r.valor === undefined ? '' : String(r.valor) })),
     },
   });
 
@@ -64,7 +69,10 @@ export function MuestraActions({ muestra }: MuestraActionsProps) {
       await updateMuestra({
         id: muestra._id,
         estado: values.estado as Id<"EstadosMuestra">,
-        resultados: values.resultados.map(r => ({ ...r, valor: r.valor === '' ? null : r.valor })),
+        resultados: values.resultados.map(r => ({ 
+          ...r, 
+          valor: (r.valor === '' || r.valor === undefined) ? null : r.valor 
+        })),
       });
       toast.success("Muestra actualizada.");
       setIsEditDialogOpen(false);
@@ -78,14 +86,14 @@ export function MuestraActions({ muestra }: MuestraActionsProps) {
       await deleteMuestra({ id: muestra._id });
       toast.success("Muestra eliminada.");
     } catch (error: unknown) {
-      toast.error("Error al eliminar la muestra.");
+        toast.error("Error al eliminar la muestra.");
     }
   };
 
   const handleEditClick = () => {
     form.reset({
       estado: muestra.estado,
-      resultados: muestra.resultados.map(r => ({ ...r, valor: r.valor ?? '' })),
+      resultados: (muestra.resultados ?? []).map(r => ({ ...r, valor: r.valor === null || r.valor === undefined ? '' : String(r.valor) })),
     });
     setIsEditDialogOpen(true);
   };
@@ -97,17 +105,19 @@ export function MuestraActions({ muestra }: MuestraActionsProps) {
 
   return (
     <>
-      {puedeVerDetalles && (
+      {isClient && puedeVerDetalles && (
         <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
           <DialogContent className="sm:max-w-2xl">
             <DialogHeader><DialogTitle>Detalles de la Muestra</DialogTitle><DialogDescription>Información completa de la muestra registrada para {muestra.clienteNombre}.</DialogDescription></DialogHeader>
-            <div className="grid gap-4 py-4"><div className="grid grid-cols-2 gap-4"><div><h4 className="text-sm font-semibold text-muted-foreground">Cliente</h4><p>{muestra.clienteNombre}</p></div><div><h4 className="text-sm font-semibold text-muted-foreground">Tipo de Análisis</h4><p>{muestra.analisisNombre}</p></div><div><h4 className="text-sm font-semibold text-muted-foreground">Estado Actual</h4><Badge style={{ backgroundColor: muestra.estadoColor, color: '#fff' }}>{muestra.estadoNombre}</Badge></div><div><h4 className="text-sm font-semibold text-muted-foreground">Fecha de Registro</h4><p>{new Date(muestra.fechaRegistro).toLocaleString()}</p></div></div><div><h4 className="text-sm font-semibold text-muted-foreground mt-4 mb-2">Resultados del Análisis</h4><div className="rounded-md border"><Table><TableHeader><TableRow><TableHead>Parámetro</TableHead><TableHead>Valor Obtenido</TableHead><TableHead className="text-right">Valor de Referencia</TableHead></TableRow></TableHeader><TableBody>{muestra.resultados.map((resultado, index) => (<TableRow key={index}><TableCell className="font-medium">{resultado.nombre}</TableCell><TableCell>{resultado.valor ?? <span className="text-muted-foreground">Pendiente</span>}</TableCell><TableCell className="text-right">{resultado.estandar}</TableCell></TableRow>))}</TableBody></Table></div></div></div>
+            <div className="grid gap-4 py-4"><div className="grid grid-cols-2 gap-4"><div><h4 className="text-sm font-semibold text-muted-foreground">Cliente</h4><p>{muestra.clienteNombre}</p></div><div><h4 className="text-sm font-semibold text-muted-foreground">Tipo de Análisis</h4><p>{muestra.analisisNombre}</p></div><div><h4 className="text-sm font-semibold text-muted-foreground">Estado Actual</h4><Badge style={{ backgroundColor: muestra.estadoColor, color: '#fff' }}>{muestra.estadoNombre}</Badge></div><div><h4 className="text-sm font-semibold text-muted-foreground">Fecha de Registro</h4><p>{new Date(muestra.fechaRegistro).toLocaleString()}</p></div></div><div><h4 className="text-sm font-semibold text-muted-foreground mt-4 mb-2">Resultados del Análisis</h4><div className="rounded-md border"><Table><TableHeader><TableRow><TableHead>Parámetro</TableHead><TableHead>Valor Obtenido</TableHead><TableHead className="text-right">Valor de Referencia</TableHead></TableRow></TableHeader><TableBody>
+              {(muestra.resultados ?? []).map((resultado, index) => (<TableRow key={index}><TableCell className="font-medium">{resultado.nombre}</TableCell><TableCell>{resultado.valor ?? <span className="text-muted-foreground">Pendiente</span>}</TableCell><TableCell className="text-right">{resultado.estandar}</TableCell></TableRow>))}
+            </TableBody></Table></div></div></div>
             <DialogFooter><Button onClick={() => setIsDetailsOpen(false)}>Cerrar</Button></DialogFooter>
           </DialogContent>
         </Dialog>
       )}
       
-      {puedeEditar && (
+      {isClient && puedeEditar && (
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>Editar Muestra de {muestra.clienteNombre}</DialogTitle></DialogHeader>
@@ -126,7 +136,14 @@ export function MuestraActions({ muestra }: MuestraActionsProps) {
                     {fields.map((field, index) => (
                       <div key={field.id} className="grid grid-cols-4 gap-2 items-center border p-2 rounded-md">
                         <div className="col-span-3 space-y-1"><p className="font-semibold text-sm">{field.nombre}</p><p className="text-xs text-muted-foreground">{field.medicion} | Ref: {field.estandar}</p></div>
-                        <FormField control={form.control} name={`resultados.${index}.valor`} render={({ field }) => ( <FormItem><FormControl><Input placeholder="Valor..." {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                        <FormField control={form.control} name={`resultados.${index}.valor`} render={({ field }) => ( 
+                          <FormItem>
+                            <FormControl>
+                              <Input placeholder="Valor..." {...field} value={field.value ?? ''} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem> 
+                        )}/>
                       </div>
                     ))}
                   </div>
@@ -141,31 +158,31 @@ export function MuestraActions({ muestra }: MuestraActionsProps) {
         </Dialog>
       )}
       
-      {puedeEliminar && (
+      {isClient && puedeEliminar && (
         <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>¿Estás seguro?</AlertDialogTitle><AlertDialogDescription>Esta acción no se puede deshacer.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">Eliminar</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
       )}
       
       <Sheet>
         <TooltipProvider delayDuration={100}>
           <div className="flex items-center justify-end gap-1">
-            {puedeVerNotas && (
+            {isClient && puedeVerNotas && (
               <Tooltip>
                 <TooltipTrigger asChild><SheetTrigger asChild><Button variant="ghost" size="icon"><StickyNote className="h-4 w-4" /><span className="sr-only">Gestionar Notas</span></Button></SheetTrigger></TooltipTrigger>
                 <TooltipContent><p>Gestionar Notas</p></TooltipContent>
               </Tooltip>
             )}
-            {puedeVerDetalles && (
+            {isClient && puedeVerDetalles && (
               <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => setIsDetailsOpen(true)}><FileSearch className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent><p>Ver Detalles</p></TooltipContent></Tooltip>
             )}
-            {puedeEditar && (
+            {isClient && puedeEditar && (
               <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={handleEditClick}><FilePenLine className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent><p>Editar Muestra</p></TooltipContent></Tooltip>
             )}
-            {puedeEliminar && (
+            {isClient && puedeEliminar && (
               <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => setIsDeleteDialogOpen(true)} className="text-red-500 hover:text-red-600"><Trash2 className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent><p>Eliminar Muestra</p></TooltipContent></Tooltip>
             )}
           </div>
         </TooltipProvider>
-        {puedeVerNotas && (
+        {isClient && puedeVerNotas && (
           <SheetContent>
             <SheetHeader><SheetTitle>Notas para: {muestra.clienteNombre}</SheetTitle></SheetHeader>
             <NotasManager muestraId={muestra._id} />

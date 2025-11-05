@@ -14,18 +14,15 @@ import { MuestraActions } from "./muestra-actions";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Doc } from "@/convex/_generated/dataModel"; 
 
-// Definimos un tipo local para la data enriquecida que viene de la query
-type MuestraConDetalles = {
-  _id: string;
-  clienteNombre: string;
-  estadoNombre: string;
-  estadoColor: string;
-  fechaRegistro: number;
-  // Añade aquí otros campos de la muestra que necesites
+type MuestraConDetalles = Doc<"Muestras"> & { 
+  clienteNombre: string; 
+  estadoNombre: string; 
+  estadoColor: string; 
+  analisisNombre: string; 
 };
 
 
@@ -45,7 +42,6 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     state: { columnFilters },
-    // Habilitar el filtro para una columna anidada
     getColumnCanGlobalFilter: () => true,
   });
 
@@ -58,7 +54,6 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
         </Table>
       </div>
 
-      {/* Vista de Tarjetas para Móvil */}
       <div className="grid gap-4 md:hidden">
         {table.getRowModel().rows?.length ? (
           table.getRowModel().rows.map((row) => {
@@ -68,7 +63,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between text-lg">
                     <span>{muestra.clienteNombre}</span>
-                    <MuestraActions muestra={row.original as any} />
+                    <MuestraActions muestra={muestra} />
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
@@ -89,7 +84,6 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
         )}
       </div>
 
-      {/* Paginación */}
       <div className="flex items-center justify-end space-x-2 py-4">
         <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>Anterior</Button>
         <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>Siguiente</Button>

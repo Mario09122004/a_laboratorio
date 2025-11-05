@@ -1,5 +1,7 @@
 "use client"
 
+import { useState, useEffect } from "react"
+import Link from "next/link"
 import { User, TestTubes, TestTubeDiagonal, LogOut, KeyRound } from "lucide-react"
 import { useUser, useClerk } from "@clerk/nextjs"
 import {
@@ -32,55 +34,72 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { hasPermission } from "@/lib/utils"
 
 const items = [
   {
     title: "Muestras",
     url: "/muestras",
     icon: TestTubes,
+    permission: "VerMuestras",
   },
   {
     title: "Clientes",
     url: "/clientes",
     icon: User,
+    permission: "VerClientes",
   },
   {
     title: "Análisis",
     url: "/analisis",
     icon: TestTubeDiagonal,
+    permission: "VerAnalisis",
   },
   {
     title: "Estados de la muestra",
     url: "/estadosMuestra",
     icon: TestTubes,
+    permission: "VerEstados",
   },
   {
     title: "Administracion de usuarios",
     url: "/rolypermisos",
     icon: KeyRound,
+    permission: "VerRolesYPermisos",
   },
 ]
 
 export function AppSidebar() {
-  const { user } = useUser()
+  const { user, isLoaded } = useUser() 
   const { signOut } = useClerk()
+  const [isClient, setIsClient] = useState(false); 
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
     <Sidebar className="flex flex-col justify-between">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Aplicación</SidebarGroupLabel>
+          <SidebarGroupLabel asChild>
+            <Link href="/" className="px-3 text-sm font-semibold text-muted-foreground no-underline">
+              Aplicación
+            </Link>
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url} className="flex items-center gap-2">
-                      <item.icon className="w-5 h-5" />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                isClient && isLoaded && hasPermission(item.permission) && (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <Link href={item.url} className="flex items-center gap-2">
+                        <item.icon className="w-5 h-5" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
@@ -88,7 +107,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <div className="p-4 border-t mt-auto flex items-center gap-3">
-        {user ? (
+        {isClient && isLoaded && user ? (
           <AlertDialog>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -108,7 +127,7 @@ export function AppSidebar() {
                 <DropdownMenuSeparator />
                 <AlertDialogTrigger asChild>
                   <DropdownMenuItem
-                    onSelect={(e) => e.preventDefault()} // Previene que el menú se cierre al hacer clic
+                    onSelect={(e) => e.preventDefault()}
                     className="text-red-600 focus:text-red-700 cursor-pointer"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
@@ -137,9 +156,12 @@ export function AppSidebar() {
             </AlertDialogContent>
           </AlertDialog>
         ) : (
-          <p className="text-sm text-muted-foreground">Cargando...</p>
+          <p className="text-sm text-muted-foreground">
+            {!isClient || !isLoaded ? "Cargando..." : "No ha iniciado sesión"}
+          </p>
         )}
       </div>
+      
     </Sidebar>
   )
 }

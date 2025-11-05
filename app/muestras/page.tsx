@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Loader2, X } from "lucide-react";
@@ -8,7 +8,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 
 import { DataTable } from "@/components/muestras/data-table";
 import { columns } from "@/components/muestras/columns";
-import { RegisterMuestraButton } from "@/components/muestras/register-muestra-button";
+import { RegisterMestraButton } from "@/components/muestras/register-muestra-button";
 
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -20,14 +20,12 @@ export default function MuestrasPage() {
   const [fechaInicioInput, setFechaInicioInput] = useState<Date | undefined>();
   const [fechaFinInput, setFechaFinInput] = useState<Date | undefined>();
 
-  const [filteredData, setFilteredData] = useState<any[]>([]);
-
   const estados = useQuery(api.estadosMuestra.getEstadosMuestra);
   const todasLasMuestras = useQuery(api.muestras.getMuestras);
 
-  useEffect(() => {
+  const filteredData = useMemo(() => {
     if (!todasLasMuestras) {
-      return;
+      return [];
     }
 
     let data = [...todasLasMuestras];
@@ -45,7 +43,7 @@ export default function MuestrasPage() {
         data = data.filter(m => m.fechaRegistro >= from && m.fechaRegistro <= to);
       }
     }
-    setFilteredData(data);
+    return data;
   }, [clienteInput, estadoInput, fechaInicioInput, fechaFinInput, todasLasMuestras]);
 
   const limpiarFiltros = () => {
@@ -61,7 +59,7 @@ export default function MuestrasPage() {
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-3xl font-bold tracking-tight">Gestión de Muestras</h1>
-        <RegisterMuestraButton />
+        <RegisterMestraButton />
       </div>
 
       <div className="flex flex-col md:flex-row gap-2 items-center p-4 border rounded-lg mb-6">

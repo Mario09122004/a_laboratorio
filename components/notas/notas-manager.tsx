@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Doc, Id } from "@/convex/_generated/dataModel";
@@ -11,6 +11,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"; // 1. Imports agregados
 import { hasPermission } from "@/lib/utils";
 
 interface NotasManagerProps {
@@ -19,11 +30,17 @@ interface NotasManagerProps {
 
 export function NotasManager({ muestraId }: NotasManagerProps) {
   const [nuevaNota, setNuevaNota] = useState("");
+  const [isClient, setIsClient] = useState(false); 
+
   const notas = useQuery(api.notas.getNotasPorMuestra, { muestraId });
 
   const createNota = useMutation(api.notas.createNota);
   const updateNota = useMutation(api.notas.updateNota);
   const deleteNota = useMutation(api.notas.deleteNota);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleCreateNota = async () => {
     if (nuevaNota.trim() === "") {
@@ -51,21 +68,24 @@ export function NotasManager({ muestraId }: NotasManagerProps) {
   //Consultar permisos
   const puedeEliminarNotas = hasPermission("EliminarNotas");
   const puedeAgregarNotas = hasPermission("AgregarNotas");
-  const puedeTacharNotas = hasPermission("VerNotas");
+  const puedeTacharNotas = hasPermission("MarcarNotas");
 
   return (
     <div className="flex flex-col h-full p-4">
-      <div className="flex gap-2 mb-4">
-        <Input
-          value={nuevaNota}
-          onChange={(e) => setNuevaNota(e.target.value)}
-          placeholder="Añadir una nueva nota..."
-          onKeyDown={(e) => e.key === 'Enter' && handleCreateNota()}
-        />
-        <Button onClick={handleCreateNota} disabled={!nuevaNota.trim()}>
-          <Plus className="h-4 w-4" />
-        </Button>
-      </div>
+
+      {isClient && puedeAgregarNotas && (
+        <div className="flex gap-2 mb-4">
+          <Input
+            value={nuevaNota}
+            onChange={(e) => setNuevaNota(e.target.value)}
+            placeholder="Añadir una nueva nota..."
+            onKeyDown={(e) => e.key === 'Enter' && handleCreateNota()}
+          />
+          <Button onClick={handleCreateNota} disabled={!nuevaNota.trim()}>
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto">
         {notas === undefined && (
@@ -85,32 +105,61 @@ export function NotasManager({ muestraId }: NotasManagerProps) {
             <TooltipProvider>
               {notas.map((nota) => (
                 <li key={nota._id} className="flex items-center gap-3 p-2 border rounded-md">
+                  
                   <Checkbox
                     checked={nota.completado}
                     onCheckedChange={() => handleToggleCompletado(nota)}
                     id={`nota-${nota._id}`}
+                    disabled={!isClient || !puedeTacharNotas}
                   />
+
                   <label
                     htmlFor={`nota-${nota._id}`}
                     className={`flex-1 text-sm ${nota.completado ? 'line-through text-muted-foreground' : ''}`}
                   >
                     {nota.contenido}
                   </label>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteNota(nota._id)}
-                        className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Eliminar Nota</p>
-                    </TooltipContent>
-                  </Tooltip>
+
+                  {isClient && puedeEliminarNotas && (
+                    // 2. Integración de AlertDialog
+                    <AlertDialog>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Eliminar Nota</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>¿Estás absolutamente seguro?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Esta acción no se puede deshacer. La nota se eliminará permanentemente
+                            de la base de datos.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          {/* 3. Lógica de borrado movida aquí */}
+                          <AlertDialogAction
+                            onClick={() => handleDeleteNota(nota._id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Eliminar
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
                 </li>
               ))}
             </TooltipProvider>

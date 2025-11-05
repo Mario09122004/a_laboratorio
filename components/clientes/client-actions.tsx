@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Doc } from "@/convex/_generated/dataModel";
@@ -43,6 +43,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { hasPermission } from "@/lib/utils";
 
 const formSchema = z.object({
   nombreCompleto: z.string().min(3, { message: "El nombre debe tener al menos 3 caracteres." }),
@@ -57,9 +58,14 @@ interface ClientActionsProps {
 export function ClientActions({ cliente }: ClientActionsProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false); 
 
   const updateCliente = useMutation(api.clientes.updateCliente);
   const deleteCliente = useMutation(api.clientes.deleteCliente);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -98,35 +104,44 @@ export function ClientActions({ cliente }: ClientActionsProps) {
     setIsEditDialogOpen(true);
   }
 
+  const puedeEditarClientes = hasPermission("EditarClientes");
+  const puedeEliminarClientes = hasPermission("EliminarClientes");
+
   return (
     <>
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Editar Cliente</DialogTitle></DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onUpdateSubmit)} className="space-y-4">
-              <FormField control={form.control} name="nombreCompleto" render={({ field }) => ( <FormItem> <FormLabel>Nombre Completo</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-              <FormField control={form.control} name="correo" render={({ field }) => ( <FormItem> <FormLabel>Correo (Opcional)</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-              <FormField control={form.control} name="telefono" render={({ field }) => ( <FormItem> <FormLabel>Teléfono (Opcional)</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-              <DialogFooter>
-                <Button type="button" variant="secondary" onClick={() => setIsEditDialogOpen(false)}>Cancelar</Button>
-                <Button type="submit" disabled={form.formState.isSubmitting}> {form.formState.isSubmitting ? "Guardando..." : "Guardar Cambios"} </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+      {isClient && puedeEditarClientes && (
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent>
+            <DialogHeader><DialogTitle>Editar Cliente</DialogTitle></DialogHeader>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onUpdateSubmit)} className="space-y-4">
+                <FormField control={form.control} name="nombreCompleto" render={({ field }) => ( <FormItem> <FormLabel>Nombre Completo</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                <FormField control={form.control} name="correo" render={({ field }) => ( <FormItem> <FormLabel>Correo (Opcional)</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                <FormField control={form.control} name="telefono" render={({ field }) => ( <FormItem> <FormLabel>Teléfono (Opcional)</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                <DialogFooter>
+                  <Button type="button" variant="secondary" onClick={() => setIsEditDialogOpen(false)}>Cancelar</Button>
+                  <Button type="submit" disabled={form.formState.isSubmitting}> {form.formState.isSubmitting ? "Guardando..." : "Guardar Cambios"} </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+      )}
 
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader><AlertDialogTitle>¿Estás seguro?</AlertDialogTitle><AlertDialogDescription> Esta acción no se puede deshacer. El cliente será eliminado permanentemente. </AlertDialogDescription></AlertDialogHeader>
-          <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">Eliminar</AlertDialogAction></AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {isClient && puedeEliminarClientes && (
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader><AlertDialogTitle>¿Estás seguro?</AlertDialogTitle><AlertDialogDescription> Esta acción no se puede deshacer. El cliente será eliminado permanentemente. </AlertDialogDescription></AlertDialogHeader>
+            <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">Eliminar</AlertDialogAction></AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
 
       <TooltipProvider delayDuration={100}>
         <div className="flex items-center justify-end gap-2">
-            <Tooltip>
+          
+            {isClient && puedeEditarClientes && (
+              <Tooltip>
                 <TooltipTrigger asChild>
                     <Button variant="ghost" size="icon" onClick={handleEditClick}>
                         <FilePenLine className="h-4 w-4" />
@@ -134,9 +149,11 @@ export function ClientActions({ cliente }: ClientActionsProps) {
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent><p>Editar Cliente</p></TooltipContent>
-            </Tooltip>
+              </Tooltip>
+            )}
 
-            <Tooltip>
+            {isClient && puedeEliminarClientes && (
+              <Tooltip>
                 <TooltipTrigger asChild>
                     <Button variant="ghost" size="icon" onClick={() => setIsDeleteDialogOpen(true)} className="text-red-500 hover:text-red-600">
                         <Trash2 className="h-4 w-4" />
@@ -144,7 +161,9 @@ export function ClientActions({ cliente }: ClientActionsProps) {
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent><p>Eliminar Cliente</p></TooltipContent>
-            </Tooltip>
+              </Tooltip>
+            )}
+            
         </div>
       </TooltipProvider>
     </>

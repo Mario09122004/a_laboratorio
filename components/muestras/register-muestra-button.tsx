@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react"; // 1. Importar useEffect
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
@@ -24,16 +24,24 @@ const formSchema = z.object({
   estado: z.string().min(1, { message: "Debe seleccionar un estado inicial." }),
 });
 
-export function RegisterMuestraButton() {
+export function RegisterMestraButton() {
   const [isOpen, setIsOpen] = useState(false);
   const [clienteSearch, setClienteSearch] = useState("");
   const [analisisSearch, setAnalisisSearch] = useState("");
+  
+  // 2. Añadir el estado 'isClient'
+  const [isClient, setIsClient] = useState(false);
   
   const clientes = useQuery(api.clientes.getClientes);
   const analisis = useQuery(api.analisis.getAnalisis);
   const estados = useQuery(api.estadosMuestra.getEstadosMuestra);
 
   const createMuestra = useMutation(api.muestras.createMuestra);
+
+  // 3. Añadir el useEffect para actualizar 'isClient' solo en el navegador
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -87,11 +95,10 @@ export function RegisterMuestraButton() {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
 
-
-        { puedeRegistrar && (
-        <Button><PlusCircle className="h-4 w-4 mr-2" />Registrar Muestra</Button>
+        {/* 4. Modificar la condición para incluir 'isClient' */}
+        { isClient && puedeRegistrar && (
+          <Button><PlusCircle className="h-4 w-4 mr-2" />Registrar Muestra</Button>
         )}
-
 
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">

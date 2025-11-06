@@ -1,14 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Doc, Id } from "@/convex/_generated/dataModel";
-import { FilePenLine, Trash2, FileSearch, StickyNote } from "lucide-react";
+import { FilePenLine, Trash2, FileSearch, StickyNote, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { generateMuestraPdf } from "@/components/muestras/pdfGenerator";
+
+import { QRCodeSVG } from "qrcode.react";
 
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -98,21 +101,88 @@ export function MuestraActions({ muestra }: MuestraActionsProps) {
     setIsEditDialogOpen(true);
   };
 
+  const tieneResultadosCompletos = useMemo(() => {
+    if (!muestra.resultados || muestra.resultados.length === 0) {
+      return false;
+    }
+    return muestra.resultados.some(r => r.valor !== null && r.valor !== undefined);
+  }, [muestra.resultados]);
+
+  const handleGeneratePdf = () => {
+    generateMuestraPdf(muestra);
+  };
+
   const puedeEliminar = hasPermission("EliminarMuestra");
   const puedeEditar = hasPermission("EditarMuestra");
   const puedeVerDetalles = hasPermission("VerDetallesMuestra");
   const puedeVerNotas = hasPermission("VerNotasMuestras");
+  // 2. Nuevo permiso para QR, o reutilizamos `puedeVerDetalles`
+  const puedeVerQR = hasPermission("VerDetallesMuestra"); // Puedes crear un permiso específico si lo necesitas
 
   return (
     <>
       {isClient && puedeVerDetalles && (
         <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-          <DialogContent className="sm:max-w-2xl">
+          {/* 3. Aumentar el tamaño del Dialog para el QR si es necesario */}
+          <DialogContent className="sm:max-w-3xl"> 
             <DialogHeader><DialogTitle>Detalles de la Muestra</DialogTitle><DialogDescription>Información completa de la muestra registrada para {muestra.clienteNombre}.</DialogDescription></DialogHeader>
-            <div className="grid gap-4 py-4"><div className="grid grid-cols-2 gap-4"><div><h4 className="text-sm font-semibold text-muted-foreground">Cliente</h4><p>{muestra.clienteNombre}</p></div><div><h4 className="text-sm font-semibold text-muted-foreground">Tipo de Análisis</h4><p>{muestra.analisisNombre}</p></div><div><h4 className="text-sm font-semibold text-muted-foreground">Estado Actual</h4><Badge style={{ backgroundColor: muestra.estadoColor, color: '#fff' }}>{muestra.estadoNombre}</Badge></div><div><h4 className="text-sm font-semibold text-muted-foreground">Fecha de Registro</h4><p>{new Date(muestra.fechaRegistro).toLocaleString()}</p></div></div><div><h4 className="text-sm font-semibold text-muted-foreground mt-4 mb-2">Resultados del Análisis</h4><div className="rounded-md border"><Table><TableHeader><TableRow><TableHead>Parámetro</TableHead><TableHead>Valor Obtenido</TableHead><TableHead className="text-right">Valor de Referencia</TableHead></TableRow></TableHeader><TableBody>
-              {(muestra.resultados ?? []).map((resultado, index) => (<TableRow key={index}><TableCell className="font-medium">{resultado.nombre}</TableCell><TableCell>{resultado.valor ?? <span className="text-muted-foreground">Pendiente</span>}</TableCell><TableCell className="text-right">{resultado.estandar}</TableCell></TableRow>))}
-            </TableBody></Table></div></div></div>
-            <DialogFooter><Button onClick={() => setIsDetailsOpen(false)}>Cerrar</Button></DialogFooter>
+            
+            {/* 4. Contenedor para el QR y los detalles */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
+              {/* Columna de detalles (primera columna) */}
+              <div className="md:col-span-2 grid gap-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div><h4 className="text-sm font-semibold text-muted-foreground">Cliente</h4><p>{muestra.clienteNombre}</p></div>
+                  <div><h4 className="text-sm font-semibold text-muted-foreground">Tipo de Análisis</h4><p>{muestra.analisisNombre}</p></div>
+                  <div><h4 className="text-sm font-semibold text-muted-foreground">Estado Actual</h4><Badge style={{ backgroundColor: muestra.estadoColor, color: '#fff' }}>{muestra.estadoNombre}</Badge></div>
+                  <div><h4 className="text-sm font-semibold text-muted-foreground">Fecha de Registro</h4><p>{new Date(muestra.fechaRegistro).toLocaleString()}</p></div>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-muted-foreground mt-4 mb-2">Resultados del Análisis</h4>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader><TableRow><TableHead>Parámetro</TableHead><TableHead>Valor Obtenido</TableHead><TableHead className="text-right">Valor de Referencia</TableHead></TableRow></TableHeader>
+                      <TableBody>
+                        {(muestra.resultados ?? []).map((resultado, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-medium">{resultado.nombre}</TableCell>
+                            <TableCell>{resultado.valor ?? <span className="text-muted-foreground">Pendiente</span>}</TableCell>
+                            <TableCell className="text-right">{resultado.estandar}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              </div>
+
+              {/* Columna del QR (segunda columna) */}
+              {isClient && puedeVerQR && (
+                <div className="flex flex-col items-center justify-center border rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
+                  <h4 className="text-md font-semibold text-muted-foreground mb-4">ID de Muestra QR</h4>
+                  <QRCodeSVG 
+                    value={muestra._id} // El ID de la muestra es el valor del QR
+                    size={180}
+                    level={"H"} // Nivel de corrección de error (High)
+                    includeMargin={false}
+                    className="p-2 bg-white rounded-md" // Estilo para el QR
+                  />
+                  <p className="mt-4 text-sm text-center text-muted-foreground break-all">ID: {muestra._id}</p>
+                </div>
+              )}
+            </div>
+            
+            <DialogFooter className="sm:justify-between">
+              {tieneResultadosCompletos ? (
+                <Button variant="outline" onClick={handleGeneratePdf}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Descargar PDF
+                </Button>
+              ) : (
+                <div></div>
+              )}
+              <Button onClick={() => setIsDetailsOpen(false)}>Cerrar</Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       )}
@@ -171,6 +241,18 @@ export function MuestraActions({ muestra }: MuestraActionsProps) {
                 <TooltipContent><p>Gestionar Notas</p></TooltipContent>
               </Tooltip>
             )}
+
+            {isClient && puedeVerDetalles && tieneResultadosCompletos && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" onClick={handleGeneratePdf}>
+                    <FileText className="h-4 w-4 text-blue-600" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent><p>Descargar Resultados (PDF)</p></TooltipContent>
+              </Tooltip>
+            )}
+
             {isClient && puedeVerDetalles && (
               <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => setIsDetailsOpen(true)}><FileSearch className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent><p>Ver Detalles</p></TooltipContent></Tooltip>
             )}

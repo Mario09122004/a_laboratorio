@@ -1,29 +1,108 @@
 "use client";
 
-import { useEffect } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
-export function AuthHandler() {
-  const { user, isSignedIn } = useUser();
+type AuthData = {
+  role: string | null;
+  permissions: string[];
+};
 
-  const permissionsData = useQuery(
+type AuthorizationContextType = AuthData & {
+  isLoading: boolean;
+};
+
+const getInitialAuthData = (): AuthData => {
+  // --- 👇 AQUÍ ESTÁ LA CORRECCIÓN 👇 ---
+  //
+  // 1. Comprobar si estamos en el servidor.
+  //    Si 'window' no está definido, significa que estamos en el servidor.
+  if (typeof window === "undefined") {
+    // Devolver un estado vacío y seguro para el servidor.
+    return { role: null, permissions: [] };
+  }
+  // --- Fin de la corrección ---
+
+  // 2. Si el código llega aquí, estamos en el navegador y localStorage existe.
+  try {
+    const item = localStorage.getItem("userAuth");
+    if (item) {
+      const data = JSON.parse(item);
+      if (data.role && data.permissions) {
+        return { role: data.role, permissions: data.permissions };
+      }
+    }
+  } catch (error) {
+    console.error("Error al leer 'userAuth' de localStorage", error);
+  }
+  return { role: null, permissions: [] };
+};
+
+const AuthorizationContext = createContext<AuthorizationContextType>({
+  role: null,
+  permissions: [],
+  isLoading: true,
+});
+
+export const AuthorizationProvider = ({ children }: { children: ReactNode }) => {
+  const [authData, setAuthData] = useState<AuthData>(getInitialAuthData);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const { user, isLoaded: isClerkLoaded } = useUser();
+
+  const permissionsQuery = useQuery(
     api.users.getUserRoleAndPermissions,
-    isSignedIn && user?.id ? { clerkId: user.id } : "skip"
+    user?.id ? { clerkId: user.id } : "skip"
   );
 
   useEffect(() => {
-    if (!isSignedIn) {
-      localStorage.removeItem("userPermissions");
+    if (!isClerkLoaded) {
+      setIsLoading(true);
       return;
     }
 
-    if (permissionsData !== undefined && permissionsData !== null) {
-      localStorage.setItem("userPermissions", JSON.stringify(permissionsData));
+    if (!user) {
+      localStorage.removeItem("userAuth");
+      setAuthData({ role: null, permissions: [] });
+      setIsLoading(false);
+      return;
+    }
+
+    if (permissionsQuery === undefined) {
+      setIsLoading(true);
+      return;
+    }
+
+    if (permissionsQuery) {
+      const { roleName: newRole, permissions: newPermissions } = permissionsQuery;
+      
+      setAuthData({ role: newRole, permissions: newPermissions });
+      localStorage.setItem("userAuth", JSON.stringify({ role: newRole, permissions: newPermissions }));
+    } else {
+      setAuthData({ role: null, permissions: [] });
+      localStorage.removeItem("userAuth");
     }
     
-  }, [isSignedIn, permissionsData]);
+    setIsLoading(false);
+    
+  }, [user, isClerkLoaded, permissionsQuery]);
 
-  return null;
-}
+
+  return (
+    <AuthorizationContext.Provider 
+      value={{ role: authData.role, permissions: authData.permissions, isLoading }}
+    >
+      {children}
+    </AuthorizationContext.Provider>
+  );
+};
+
+export const useAuthorization = () => {
+  const context = useContext(AuthorizationContext);
+  if (context === undefined) {
+    throw new Error("useAuthorization must be used within an AuthorizationProvider");
+  }
+  return context;
+};

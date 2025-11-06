@@ -9,6 +9,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { DataTable } from "@/components/muestras/data-table";
 import { columns } from "@/components/muestras/columns";
 import { RegisterMestraButton } from "@/components/muestras/register-muestra-button";
+import { ScanMuestraButton } from "@/components/muestras/ScanMuestraButton"; 
 
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -59,7 +60,10 @@ export default function MuestrasPage() {
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-3xl font-bold tracking-tight">Gestión de Muestras</h1>
-        <RegisterMestraButton />
+        <div className="flex gap-2">
+          <ScanMuestraButton todasLasMuestras={todasLasMuestras ?? []} />
+          <RegisterMestraButton /> 
+        </div>
       </div>
 
       <div className="flex flex-col md:flex-row gap-2 items-center p-4 border rounded-lg mb-6">

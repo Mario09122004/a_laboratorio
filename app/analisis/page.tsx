@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Loader2 } from "lucide-react";
@@ -11,12 +10,7 @@ import { RegisterAnalisisButton } from "@/components/analisis/register-analisis-
 import { hasPermission } from "@/lib/utils";
 
 export default function AnalisisPage() {
-  const [isClient, setIsClient] = useState(false);
   const analisis = useQuery(api.analisis.getAnalisis);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   if (analisis === undefined) {
     return (
@@ -33,7 +27,7 @@ export default function AnalisisPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold tracking-tight">Catálogo de Análisis</h1>
         
-        {!isClient && puedeAgregarAnalisis && (
+        { puedeAgregarAnalisis && (
           <RegisterAnalisisButton />
         )}
 

@@ -1,103 +1,127 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useUser } from "@clerk/nextjs";
+import { 
+  Loader2, 
+  Users, 
+  FlaskConical, 
+  AlertCircle, 
+  CalendarDays, 
+  CalendarClock, 
+  Calendar1, 
+  CalendarRange 
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+interface StatCardProps {
+  title: string;
+  value: string | number;
+  description?: string;
+  icon: React.ReactNode;
+}
+
+function StatCard({ title, value, description, icon }: StatCardProps) {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        <div className="text-muted-foreground">{icon}</div>
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}</div>
+        {description && (
+          <p className="text-xs text-muted-foreground">{description}</p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+export default function DashboardPage() {
+  const { user, isLoaded } = useUser();
+  const stats = useQuery(api.dashboard.getDashboardStats);
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Buenos días";
+    if (hour < 18) return "Buenas tardes";
+    return "Buenas noches";
+  };
+
+  if (stats === undefined || !isLoaded) {
+    return (
+      <div className="flex h-[80vh] w-full items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  const data = stats || {
+    totalClientes: 0,
+    muestrasSinResultados: 0,
+    muestrasHoy: 0,
+    muestrasSemana: 0,
+    muestrasMes: 0,
+    muestrasAno: 0,
+  };
+
+  return (
+    <div className="container mx-auto py-8">
+      {/* Mensaje de Bienvenida */}
+      {user && (
+        <h1 className="text-3xl font-bold tracking-tight mb-6">
+          {getGreeting()}, {user.firstName}!
+        </h1>
+      )}
+
+      {/* Estadísticas Principales */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
+        <StatCard
+          title="Total Clientes"
+          value={data.totalClientes}
+          icon={<Users className="h-4 w-4" />}
+          description="Clientes registrados en el sistema."
+        />
+        <StatCard
+          title="Muestras Pendientes"
+          value={data.muestrasSinResultados}
+          icon={<AlertCircle className="h-4 w-4 text-yellow-500" />}
+          description="Muestras sin resultados cargados."
+        />
+        <StatCard
+          title="Total de Muestras (Año)"
+          value={data.muestrasAno}
+          icon={<FlaskConical className="h-4 w-4 text-blue-500" />}
+          description={`Total de muestras en ${new Date().getFullYear()}.`}
+        />
+      </div>
+
+      {/* Estadísticas por Tiempo */}
+      <h2 className="text-2xl font-semibold tracking-tight mb-4">Registros Recientes</h2>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Hoy"
+          value={data.muestrasHoy}
+          icon={<CalendarDays className="h-4 w-4" />}
+        />
+        <StatCard
+          title="Esta Semana"
+          value={data.muestrasSemana}
+          icon={<CalendarClock className="h-4 w-4" />}
+        />
+        <StatCard
+          title="Este Mes"
+          value={data.muestrasMes}
+          icon={<Calendar1 className="h-4 w-4" />}
+        />
+        <StatCard
+          title="Este Año"
+          value={data.muestrasAno}
+          icon={<CalendarRange className="h-4 w-4" />}
+        />
+      </div>
     </div>
   );
 }

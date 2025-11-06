@@ -10,6 +10,7 @@
 
 import type * as analisis from "../analisis.js";
 import type * as clientes from "../clientes.js";
+import type * as dashboard from "../dashboard.js";
 import type * as estadosMuestra from "../estadosMuestra.js";
 import type * as http from "../http.js";
 import type * as muestras from "../muestras.js";
@@ -35,6 +36,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   analisis: typeof analisis;
   clientes: typeof clientes;
+  dashboard: typeof dashboard;
   estadosMuestra: typeof estadosMuestra;
   http: typeof http;
   muestras: typeof muestras;

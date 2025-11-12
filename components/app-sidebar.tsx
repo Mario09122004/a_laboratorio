@@ -35,10 +35,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { hasPermission } from "@/lib/utils"
 
 const items = [
-  // ... (tu lista de items se queda igual)
   {
     title: "Muestras",
     url: "/muestras",
@@ -74,7 +72,8 @@ const items = [
 export function AppSidebar() {
   const { user, isLoaded: isClerkLoaded } = useUser() 
   const { signOut } = useClerk()
-  const { isLoading: isAuthLoading } = useAuthorization();
+
+  const { permissions, isLoading: isAuthLoading } = useAuthorization();
   
   const [isClient, setIsClient] = useState(false); 
 
@@ -93,8 +92,8 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                isClient && isClerkLoaded && !isAuthLoading && hasPermission(item.permission) && (
+              {isClient && !isAuthLoading && items.map((item) => (
+                permissions.includes(item.permission) && (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
                       <Link href={item.url} className="flex items-center gap-2">
@@ -168,7 +167,7 @@ export function AppSidebar() {
           </AlertDialog>
         ) : (
           <p className="text-sm text-muted-foreground">
-            {!isClient || !isClerkLoaded ? "Cargando..." : "No ha iniciado sesión"}
+            {!isClient || !isClerkLoaded || isAuthLoading ? "Cargando..." : "No ha iniciado sesión"}
           </p>
         )}
       </div>

@@ -14,11 +14,10 @@ type AuthorizationContextType = AuthData & {
   isLoading: boolean;
 };
 
-const getInitialAuthData = (): AuthData => {
+const getAuthDataFromStorage = (): AuthData => {
   if (typeof window === "undefined") {
     return { role: null, permissions: [] };
   }
-  
   try {
     const item = localStorage.getItem("userAuth");
     if (item) {
@@ -40,10 +39,18 @@ const AuthorizationContext = createContext<AuthorizationContextType>({
 });
 
 export const AuthorizationProvider = ({ children }: { children: ReactNode }) => {
-  const [authData, setAuthData] = useState<AuthData>(getInitialAuthData);
+  const [authData, setAuthData] = useState<AuthData>({ role: null, permissions: [] });
+  
   const [isLoading, setIsLoading] = useState(true);
-
   const { user, isLoaded: isClerkLoaded } = useUser();
+
+  useEffect(() => {
+    const cachedData = getAuthDataFromStorage();
+    if (cachedData.role) {
+      setAuthData(cachedData);
+    }
+  }, []);
+
 
   const permissionsQuery = useQuery(
     api.users.getUserRoleAndPermissions,
@@ -70,9 +77,10 @@ export const AuthorizationProvider = ({ children }: { children: ReactNode }) => 
 
     if (permissionsQuery) {
       const { roleName: newRole, permissions: newPermissions } = permissionsQuery;
+      const newData = { role: newRole, permissions: newPermissions };
       
-      setAuthData({ role: newRole, permissions: newPermissions });
-      localStorage.setItem("userAuth", JSON.stringify({ role: newRole, permissions: newPermissions }));
+      setAuthData(newData);
+      localStorage.setItem("userAuth", JSON.stringify(newData));
     } else {
       setAuthData({ role: null, permissions: [] });
       localStorage.removeItem("userAuth");

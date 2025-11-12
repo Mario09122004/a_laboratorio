@@ -1,12 +1,19 @@
+import Script from 'next/script';
 import type { Metadata } from 'next'
-import {
-  ClerkProvider,
-} from '@clerk/nextjs'
+import { ClerkProvider } from '@clerk/nextjs'
+import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css'
+
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
+
 import { ConvexClientProvider } from "./ConvexClientProvider";
 import { AuthorizationProvider } from './auth/userauth';
+
+import { Toaster } from "@/components/ui/sonner";
+
+const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });
+const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Clerk Next.js Quickstart',
@@ -19,26 +26,40 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es">
-      <body>
-        <ClerkProvider>
-          <ConvexClientProvider>
+    <ClerkProvider>
+      <html 
+        lang="es" 
+        className={`${geistSans.variable} ${geistMono.variable}`}
+        suppressHydrationWarning
+      >
+        <body className="min-h-screen flex flex-col">
 
-            <AuthorizationProvider>
-              <SidebarProvider>
-                <AppSidebar />
-                <main className="flex-1">
-                  <SidebarTrigger />
-                  <div className='p-4'>
-                    {children}
-                  </div>
-                </main>
-              </SidebarProvider>
-            </AuthorizationProvider>
+            <ConvexClientProvider>
+              <AuthorizationProvider>
+                
+                <SidebarProvider>
+                  <AppSidebar />
+                  <main className="flex-1">
+                    <SidebarTrigger />
+                    <div className='p-4'>
+                      {children}
+                    </div>
+                  </main>
+                </SidebarProvider>
 
-          </ConvexClientProvider>
-        </ClerkProvider>
-      </body>
-    </html>
+              </AuthorizationProvider>
+
+              <Toaster richColors position="top-right" />
+
+            </ConvexClientProvider>
+
+            <Script
+              src="https://w.appzi.io/w.js?token=XYtKn"
+              strategy="afterInteractive"
+            />
+
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

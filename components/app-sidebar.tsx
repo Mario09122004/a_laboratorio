@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { User, TestTubes, TestTubeDiagonal, LogOut, KeyRound } from "lucide-react"
 import { useUser, useClerk } from "@clerk/nextjs"
+import { useAuthorization } from "@/app/auth/userauth"
 import {
   Sidebar,
   SidebarContent,
@@ -37,6 +38,7 @@ import {
 import { hasPermission } from "@/lib/utils"
 
 const items = [
+  // ... (tu lista de items se queda igual)
   {
     title: "Muestras",
     url: "/muestras",
@@ -70,8 +72,10 @@ const items = [
 ]
 
 export function AppSidebar() {
-  const { user, isLoaded } = useUser() 
+  const { user, isLoaded: isClerkLoaded } = useUser() 
   const { signOut } = useClerk()
+  const { isLoading: isAuthLoading } = useAuthorization();
+  
   const [isClient, setIsClient] = useState(false); 
 
   useEffect(() => {
@@ -90,7 +94,7 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
-                isClient && isLoaded && hasPermission(item.permission) && (
+                isClient && isClerkLoaded && !isAuthLoading && hasPermission(item.permission) && (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
                       <Link href={item.url} className="flex items-center gap-2">
@@ -101,13 +105,20 @@ export function AppSidebar() {
                   </SidebarMenuItem>
                 )
               ))}
+              
+              {isAuthLoading && (
+                <div className="p-3 text-sm text-muted-foreground">
+                  Cargando menú...
+                </div>
+              )}
+
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
       <div className="p-4 border-t mt-auto flex items-center gap-3">
-        {isClient && isLoaded && user ? (
+        {isClient && isClerkLoaded && user ? (
           <AlertDialog>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -157,7 +168,7 @@ export function AppSidebar() {
           </AlertDialog>
         ) : (
           <p className="text-sm text-muted-foreground">
-            {!isClient || !isLoaded ? "Cargando..." : "No ha iniciado sesión"}
+            {!isClient || !isClerkLoaded ? "Cargando..." : "No ha iniciado sesión"}
           </p>
         )}
       </div>

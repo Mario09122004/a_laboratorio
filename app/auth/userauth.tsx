@@ -15,17 +15,10 @@ type AuthorizationContextType = AuthData & {
 };
 
 const getInitialAuthData = (): AuthData => {
-  // --- 👇 AQUÍ ESTÁ LA CORRECCIÓN 👇 ---
-  //
-  // 1. Comprobar si estamos en el servidor.
-  //    Si 'window' no está definido, significa que estamos en el servidor.
   if (typeof window === "undefined") {
-    // Devolver un estado vacío y seguro para el servidor.
     return { role: null, permissions: [] };
   }
-  // --- Fin de la corrección ---
-
-  // 2. Si el código llega aquí, estamos en el navegador y localStorage existe.
+  
   try {
     const item = localStorage.getItem("userAuth");
     if (item) {

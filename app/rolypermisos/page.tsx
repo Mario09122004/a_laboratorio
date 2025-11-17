@@ -16,6 +16,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { withPermission } from "@/components/corrobradorpermiso";
+import { PageSkeleton } from "@/components/loader";
 
 // --- Componente para la lista de usuarios y asignación de roles ---
 function UserList({ users, roles }: { users: (Doc<"Usuarios"> & { roleName: string })[], roles: Doc<"Roles">[] }) {
@@ -234,9 +236,7 @@ function RolesManager({ roles, permissions }: { roles: Doc<"Roles">[], permissio
   );
 }
 
-
-// --- Página Principal que une ambos componentes ---
-export default function RolesPermisosPage() {
+export function RolesPermisosPage() {
   const users = useQuery(api.users.getUsers);
   const roles = useQuery(api.roles.getRoles);
   const permissions = useQuery(api.permissions.getPermissions);
@@ -245,12 +245,7 @@ export default function RolesPermisosPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <Card><CardHeader><Skeleton className="h-8 w-1/3"/></CardHeader><CardContent className="space-y-4"><Skeleton className="h-16 w-full"/><Skeleton className="h-16 w-full"/></CardContent></Card>
-            <Card><CardHeader><Skeleton className="h-8 w-1/3"/></CardHeader><CardContent><Skeleton className="h-10 w-full mb-4"/><Skeleton className="h-12 w-full"/></CardContent></Card>
-        </div>
-      </div>
+      <PageSkeleton />
     );
   }
   
@@ -263,3 +258,8 @@ export default function RolesPermisosPage() {
     </div>
   );
 }
+
+export default withPermission(
+  RolesPermisosPage,
+  "VerRolesYPermisos",
+);

@@ -9,8 +9,10 @@ import { DataTable } from "@/components/estadosMuestra/data-table";
 import { columns } from "@/components/estadosMuestra/columns";
 import { RegisterEstadoButton } from "@/components/estadosMuestra/register-estado-button";
 import { hasPermission } from "@/lib/utils";
+import { withPermission } from "@/components/corrobradorpermiso";
+import { PageSkeleton } from "@/components/loader";
 
-export default function EstadosMuestraPage() {
+export function EstadosMuestraPage() {
   const [isClient, setIsClient] = useState(false);
   const estados = useQuery(api.estadosMuestra.getEstadosMuestra);
 
@@ -20,9 +22,7 @@ export default function EstadosMuestraPage() {
 
   if (estados === undefined) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <PageSkeleton />
     );
   }
 
@@ -43,3 +43,8 @@ export default function EstadosMuestraPage() {
     </div>
   );
 }
+
+export default withPermission(
+  EstadosMuestraPage,
+  "VerEstados",
+);

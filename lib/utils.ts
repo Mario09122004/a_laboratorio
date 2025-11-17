@@ -17,7 +17,7 @@ function getUserPermissions(): UserPermissions | null {
   }
   
   // Se usa el string directamente
-  const data = localStorage.getItem("userPermissions");
+  const data = localStorage.getItem("userAuth");
   if (!data) {
     return null;
   }

@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as Auth from "../Auth.js";
 import type * as analisis from "../analisis.js";
 import type * as clientes from "../clientes.js";
 import type * as dashboard from "../dashboard.js";
@@ -25,15 +26,8 @@ import type {
   FunctionReference,
 } from "convex/server";
 
-/**
- * A utility for referencing Convex functions in your app's API.
- *
- * Usage:
- * ```js
- * const myFunctionReference = api.myModule.myFunction;
- * ```
- */
 declare const fullApi: ApiFromModules<{
+  Auth: typeof Auth;
   analisis: typeof analisis;
   clientes: typeof clientes;
   dashboard: typeof dashboard;
@@ -45,14 +39,30 @@ declare const fullApi: ApiFromModules<{
   roles: typeof roles;
   users: typeof users;
 }>;
-declare const fullApiWithMounts: typeof fullApi;
 
+/**
+ * A utility for referencing Convex functions in your app's public API.
+ *
+ * Usage:
+ * ```js
+ * const myFunctionReference = api.myModule.myFunction;
+ * ```
+ */
 export declare const api: FilterApi<
-  typeof fullApiWithMounts,
+  typeof fullApi,
   FunctionReference<any, "public">
 >;
+
+/**
+ * A utility for referencing Convex functions in your app's internal API.
+ *
+ * Usage:
+ * ```js
+ * const myFunctionReference = internal.myModule.myFunction;
+ * ```
+ */
 export declare const internal: FilterApi<
-  typeof fullApiWithMounts,
+  typeof fullApi,
   FunctionReference<any, "internal">
 >;
 

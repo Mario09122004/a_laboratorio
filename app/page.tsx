@@ -14,6 +14,8 @@ import {
   CalendarRange 
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { hasPermission } from "@/lib/utils";
+import { PageSkeleton } from "@/components/loader";
 
 interface StatCardProps {
   title: string;
@@ -52,9 +54,7 @@ export default function DashboardPage() {
 
   if (stats === undefined || !isLoaded) {
     return (
-      <div className="flex h-[80vh] w-full items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
-      </div>
+      <PageSkeleton />
     );
   }
 
@@ -66,6 +66,10 @@ export default function DashboardPage() {
     muestrasMes: 0,
     muestrasAno: 0,
   };
+  
+  const puedeVerEstadisticas = hasPermission("VerEstadisticas");
+
+  console.log("Dashboard stats:", puedeVerEstadisticas);
 
   return (
     <div className="container mx-auto py-8">
@@ -76,52 +80,55 @@ export default function DashboardPage() {
         </h1>
       )}
 
-      {/* Estadísticas Principales */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
-        <StatCard
-          title="Total Clientes"
-          value={data.totalClientes}
-          icon={<Users className="h-4 w-4" />}
-          description="Clientes registrados en el sistema."
-        />
-        <StatCard
-          title="Muestras Pendientes"
-          value={data.muestrasSinResultados}
-          icon={<AlertCircle className="h-4 w-4 text-yellow-500" />}
-          description="Muestras sin resultados cargados."
-        />
-        <StatCard
-          title="Total de Muestras (Año)"
-          value={data.muestrasAno}
-          icon={<FlaskConical className="h-4 w-4 text-blue-500" />}
-          description={`Total de muestras en ${new Date().getFullYear()}.`}
-        />
-      </div>
+      {/* Estadísticas */}
+      { puedeVerEstadisticas && (
+        <>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
+            <StatCard
+              title="Total Clientes"
+              value={data.totalClientes}
+              icon={<Users className="h-4 w-4" />}
+              description="Clientes registrados en el sistema."
+            />
+            <StatCard
+              title="Muestras Pendientes"
+              value={data.muestrasSinResultados}
+              icon={<AlertCircle className="h-4 w-4 text-yellow-500" />}
+              description="Muestras sin resultados cargados."
+            />
+            <StatCard
+              title="Total de Muestras (Año)"
+              value={data.muestrasAno}
+              icon={<FlaskConical className="h-4 w-4 text-blue-500" />}
+              description={`Total de muestras en ${new Date().getFullYear()}.`}
+            />
+          </div>
 
-      {/* Estadísticas por Tiempo */}
-      <h2 className="text-2xl font-semibold tracking-tight mb-4">Registros Recientes</h2>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Hoy"
-          value={data.muestrasHoy}
-          icon={<CalendarDays className="h-4 w-4" />}
-        />
-        <StatCard
-          title="Esta Semana"
-          value={data.muestrasSemana}
-          icon={<CalendarClock className="h-4 w-4" />}
-        />
-        <StatCard
-          title="Este Mes"
-          value={data.muestrasMes}
-          icon={<Calendar1 className="h-4 w-4" />}
-        />
-        <StatCard
-          title="Este Año"
-          value={data.muestrasAno}
-          icon={<CalendarRange className="h-4 w-4" />}
-        />
-      </div>
+          <h2 className="text-2xl font-semibold tracking-tight mb-4">Registros Recientes</h2>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <StatCard
+              title="Hoy"
+              value={data.muestrasHoy}
+              icon={<CalendarDays className="h-4 w-4" />}
+            />
+            <StatCard
+              title="Esta Semana"
+              value={data.muestrasSemana}
+              icon={<CalendarClock className="h-4 w-4" />}
+            />
+            <StatCard
+              title="Este Mes"
+              value={data.muestrasMes}
+              icon={<Calendar1 className="h-4 w-4" />}
+            />
+            <StatCard
+              title="Este Año"
+              value={data.muestrasAno}
+              icon={<CalendarRange className="h-4 w-4" />}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }

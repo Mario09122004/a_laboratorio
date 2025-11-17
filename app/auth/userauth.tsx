@@ -56,6 +56,8 @@ export const AuthorizationProvider = ({ children }: { children: ReactNode }) => 
     api.users.getUserRoleAndPermissions,
     user?.id ? { clerkId: user.id } : "skip"
   );
+  console.log("permissionsQuery", permissionsQuery);
+  console.log("user", user?.id);
 
   useEffect(() => {
     if (!isClerkLoaded) {

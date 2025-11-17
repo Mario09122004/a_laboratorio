@@ -88,10 +88,12 @@ export default defineSchema({
     RolPer: defineTable({
         rolId: v.id("Roles"),
         permisoId: v.id("Permisos"),
-    }),
+    })
+    .index("by_rol_and_permission", ["rolId", "permisoId"])
+    .index("by_rolId", ["rolId"]),
 
     Permisos: defineTable({
         nombre: v.string(),
         descripcion: v.string(),
-    })
+    }).index("by_nombre", ["nombre"]),
 });

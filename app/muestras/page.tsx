@@ -14,8 +14,9 @@ import { ScanMuestraButton } from "@/components/muestras/ScanMuestraButton";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { withPermission } from "@/components/corrobradorpermiso";
 
-export default function MuestrasPage() {
+export function MuestrasPage() {
   const [clienteInput, setClienteInput] = useState("");
   const [estadoInput, setEstadoInput] = useState<string | undefined>();
   const [fechaInicioInput, setFechaInicioInput] = useState<Date | undefined>();
@@ -118,3 +119,8 @@ export default function MuestrasPage() {
     </div>
   );
 }
+
+export default withPermission(
+  MuestrasPage,
+  "VerMuestras",
+);

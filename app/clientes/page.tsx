@@ -3,14 +3,15 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Loader2 } from "lucide-react";
 
 import { DataTable } from "@/components/clientes/data-table";
 import { columns } from "@/components/clientes/columns";
 import { RegisterClientButton } from "@/components/clientes/register-client-button";
 import { hasPermission } from "@/lib/utils";
+import { withPermission } from "@/components/corrobradorpermiso";
+import { PageSkeleton } from "@/components/loader";
 
-export default function ClientesPage() {
+export function ClientesPage() {
   const [isClient, setIsClient] = useState(false);
   const clientes = useQuery(api.clientes.getClientes);
 
@@ -20,9 +21,7 @@ export default function ClientesPage() {
 
   if (clientes === undefined) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <PageSkeleton />
     );
   }
 
@@ -43,3 +42,8 @@ export default function ClientesPage() {
     </div>
   );
 }
+
+export default withPermission(
+  ClientesPage,
+  "VerClientes",
+);

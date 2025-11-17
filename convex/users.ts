@@ -45,7 +45,7 @@ export const upsertFromClerk = internalMutation({
         fechaRegistro: ahora,
         fechaActualizacion: ahora,
       });
-      console.log(`Usuario creado: ${correo}`);
+      console.log(`Usuario creado`);
     }
   },
 });
@@ -58,7 +58,7 @@ export const deleteFromClerk = internalMutation({
   handler: async (ctx, args) => {
     const usuario = await ctx.db
       .query("Usuarios")
-      .filter((q) => q.eq(q.field("clerkId"), args.clerkUserId))
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkUserId))
       .unique();
 
     if (!usuario) {
@@ -147,7 +147,7 @@ export const getUserRoleAndPermissions = query({
     // 4. Obtener las relaciones entre el rol y los permisos
     const permissionLinks = await ctx.db
       .query("RolPer")
-      .filter((q) => q.eq(q.field("rolId"), user.rol!)) // Nota: Para optimizar, considera añadir un índice en `rolId` en tu tabla RolPer.
+      .withIndex("by_rolId", (q) => q.eq("rolId", user.rol!))
       .collect();
 
     if (permissionLinks.length === 0) {

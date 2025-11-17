@@ -87,7 +87,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel asChild>
             <Link href="/" className="px-3 text-sm font-semibold text-muted-foreground no-underline">
-              Aplicación
+              Aplicación Laboratorio
             </Link>
           </SidebarGroupLabel>
           <SidebarGroupContent>

@@ -2,21 +2,20 @@
 
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Loader2 } from "lucide-react";
 
 import { DataTable } from "@/components/analisis/data-table";
 import { columns } from "@/components/analisis/columns";
 import { RegisterAnalisisButton } from "@/components/analisis/register-analisis-button";
 import { hasPermission } from "@/lib/utils";
+import { withPermission } from "@/components/corrobradorpermiso";
+import { PageSkeleton } from "@/components/loader";
 
-export default function AnalisisPage() {
+export function AnalisisPage() {
   const analisis = useQuery(api.analisis.getAnalisis);
 
   if (analisis === undefined) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <PageSkeleton />
     );
   }
   
@@ -37,3 +36,8 @@ export default function AnalisisPage() {
     </div>
   );
 }
+
+export default withPermission(
+  AnalisisPage,
+  "VerAnalisis",
+);

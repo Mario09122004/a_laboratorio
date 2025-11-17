@@ -13,6 +13,7 @@ import { AuthorizationProvider } from './auth/userauth';
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider"
 import { ModeToggle } from '@/components/bottonmode';
+import { esES } from "@clerk/localizations";
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] });
@@ -28,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider localization={esES}>
       <html 
         lang="es" 
         className={`${geistSans.variable} ${geistMono.variable}`}

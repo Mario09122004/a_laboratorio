@@ -14,6 +14,9 @@ importers:
       '@clerk/clerk-sdk-node':
         specifier: ^5.1.6
         version: 5.1.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(svix@1.76.1)
+      '@clerk/localizations':
+        specifier: ^3.28.1
+        version: 3.28.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@clerk/nextjs':
         specifier: ^6.33.2
         version: 6.33.2(next@15.5.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -177,6 +180,10 @@ packages:
     engines: {node: '>=18.17.0'}
     deprecated: 'January 10 2025 marks the end of support for @clerk/clerk-sdk-node as previously announced in our October 2024 deprecation notice. Express users can migrate to the @clerk/express package. For more information, you can find our changelog here: https://clerk.com/changelog/2025-01-10-node-sdk-eol'
 
+  '@clerk/localizations@3.28.1':
+    resolution: {integrity: sha512-aAiuKx7J8dBC0yU/MA7cG7WGgWdHyYNG19NzCHb06oSRkn+dZZIJX9cq+eJpgC2L+TQb8yLo9OuS/iRyY2PNjQ==}
+    engines: {node: '>=18.17.0'}
+
   '@clerk/nextjs@6.33.2':
     resolution: {integrity: sha512-53yCL1MzV5dNQMeTfpxBNQYT3U2UhHFXo3WSyrH9/dCTXtBff4bkj5S7Up8EmQaWk15PcgQeZeAOhJK+t3U5tg==}
     engines: {node: '>=18.17.0'}
@@ -208,6 +215,22 @@ packages:
         optional: true
       react-dom:
         optional: true
+
+  '@clerk/shared@3.35.0':
+    resolution: {integrity: sha512-UjENPnS7HLejzjMbUI9mDYJONsJR3Q3EChlamlNZfZQzMbvEE8ybETLPXxnm/JA6e1binyUJsYnaghlb+aZ6aw==}
+    engines: {node: '>=18.17.0'}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0 || ^19.0.0-0
+      react-dom: ^18.0.0 || ^19.0.0 || ^19.0.0-0
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
+
+  '@clerk/types@4.101.0':
+    resolution: {integrity: sha512-Y9fRBgNoztH42a0sVIcNGdMX7KZl7i/+07fi35lw2K2Tqpc3cFUlZ5J4KAEAT8EN3/E6iPgsxHOyvCrTmQ2V+A==}
+    engines: {node: '>=18.17.0'}
 
   '@clerk/types@4.91.0':
     resolution: {integrity: sha512-wvumOakC1tVDeCjGE1AqhgorMiK0PEDx+knnjxVnRP/pB8eY+JuWvNoBPlqbj2jbQAmcoLN17SigUNdvO5PDLw==}
@@ -2922,6 +2945,13 @@ snapshots:
       - react-dom
       - svix
 
+  '@clerk/localizations@3.28.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+    dependencies:
+      '@clerk/types': 4.101.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+    transitivePeerDependencies:
+      - react
+      - react-dom
+
   '@clerk/nextjs@6.33.2(next@15.5.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
       '@clerk/backend': 2.17.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -2957,6 +2987,25 @@ snapshots:
     optionalDependencies:
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
+
+  '@clerk/shared@3.35.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+    dependencies:
+      csstype: 3.1.3
+      dequal: 2.0.3
+      glob-to-regexp: 0.4.1
+      js-cookie: 3.0.5
+      std-env: 3.9.0
+      swr: 2.3.4(react@19.1.0)
+    optionalDependencies:
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+
+  '@clerk/types@4.101.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+    dependencies:
+      '@clerk/shared': 3.35.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+    transitivePeerDependencies:
+      - react
+      - react-dom
 
   '@clerk/types@4.91.0':
     dependencies:

@@ -14,12 +14,10 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { withPermission } from "@/components/corrobradorpermiso";
 import { PageSkeleton } from "@/components/loader";
 
-// --- Componente para la lista de usuarios y asignación de roles ---
 function UserList({ users, roles }: { users: (Doc<"Usuarios"> & { roleName: string })[], roles: Doc<"Roles">[] }) {
   const [filtroUsuario, setFiltroUsuario] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -57,7 +55,7 @@ function UserList({ users, roles }: { users: (Doc<"Usuarios"> & { roleName: stri
             value={filtroUsuario}
             onChange={(e) => {
                 setFiltroUsuario(e.target.value);
-                setCurrentPage(1); // Reset page on new search
+                setCurrentPage(1);
             }}
             className="mt-2"
         />
@@ -95,7 +93,6 @@ function UserList({ users, roles }: { users: (Doc<"Usuarios"> & { roleName: stri
   );
 }
 
-// --- Componente para la gestión de roles y sus permisos ---
 function RolesManager({ roles, permissions }: { roles: Doc<"Roles">[], permissions: Doc<"Permisos">[] }) {
   const [selectedRoleId, setSelectedRoleId] = useState<Id<"Roles"> | null>(null);
   const [newRoleName, setNewRoleName] = useState("");

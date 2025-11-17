@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Loader2 } from "lucide-react";
 
 import { DataTable } from "@/components/estadosMuestra/data-table";
 import { columns } from "@/components/estadosMuestra/columns";

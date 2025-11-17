@@ -21,7 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"; // 1. Imports agregados
+} from "@/components/ui/alert-dialog";
 import { hasPermission } from "@/lib/utils";
 
 interface NotasManagerProps {

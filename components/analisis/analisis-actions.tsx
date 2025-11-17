@@ -67,6 +67,7 @@ export function AnalisisActions({ analisis }: AnalisisActionsProps) {
       toast.success("Análisis actualizado.");
       setIsEditDialogOpen(false);
     } catch (error) {
+      console.error(error);
       toast.error("Error al actualizar el análisis.");
     }
   };
@@ -76,6 +77,7 @@ export function AnalisisActions({ analisis }: AnalisisActionsProps) {
       await deleteAnalisis({ id: analisis._id });
       toast.success("Análisis eliminado.");
     } catch (error) {
+      console.error(error);
       toast.error("Error al eliminar el análisis.");
     }
   };

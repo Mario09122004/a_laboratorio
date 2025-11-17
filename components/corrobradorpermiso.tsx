@@ -5,7 +5,6 @@ import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useEffect, type ComponentType } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 import { ShieldAlert } from "lucide-react";
 import { PageSkeleton } from "@/components/loader";
  

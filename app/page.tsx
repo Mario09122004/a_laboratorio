@@ -4,7 +4,6 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { 
-  Loader2, 
   Users, 
   FlaskConical, 
   AlertCircle, 
@@ -73,14 +72,12 @@ export default function DashboardPage() {
 
   return (
     <div className="container mx-auto py-8">
-      {/* Mensaje de Bienvenida */}
       {user && (
         <h1 className="text-3xl font-bold tracking-tight mb-6">
           {getGreeting()}, {user.firstName}!
         </h1>
       )}
 
-      {/* Estadísticas */}
       { puedeVerEstadisticas && (
         <>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">

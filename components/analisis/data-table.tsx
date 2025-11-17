@@ -47,7 +47,6 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
         />
       </div>
 
-      {/* Vista de Tabla para Escritorio */}
       <div className="hidden rounded-md border md:block">
         <Table>
           <TableHeader>
@@ -79,7 +78,6 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
         </Table>
       </div>
 
-      {/* Vista de Tarjetas para Móvil */}
       <div className="grid gap-4 md:hidden">
         {table.getRowModel().rows?.length ? (
           table.getRowModel().rows.map((row) => (
@@ -109,7 +107,6 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
         )}
       </div>
 
-      {/* Controles de paginación */}
       <div className="flex items-center justify-end space-x-2 py-4">
         <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>Anterior</Button>
         <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>Siguiente</Button>

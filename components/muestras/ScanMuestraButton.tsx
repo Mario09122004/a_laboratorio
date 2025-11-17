@@ -11,8 +11,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-// 1. Importar el nuevo componente de scanner
-import { QrReader, OnResultFunction } from "react-qr-reader";
+import { QrScanner } from "@yudiel/react-qr-scanner";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -24,7 +23,7 @@ import { useUser } from "@clerk/nextjs";
 
 type MuestraConDetalles = Doc<"Muestras"> & { 
   clienteNombre: string; 
-  estadoNombre: string; 
+  estadoNombre: string;
   estadoColor: string; 
   analisisNombre: string; 
 };
@@ -88,28 +87,38 @@ export function ScanMuestraButton({ todasLasMuestras }: ScanMuestraButtonProps) 
     }
   };
 
-  // 2. Nueva función para manejar el resultado del scanner
-  const handleScanResult: OnResultFunction = (result, error) => {
-    if (result) {
-      const decodedText = result.getText();
-      setIsScannerOpen(false); // Cerrar modal del scanner
-      
-      const foundMuestra = todasLasMuestras.find(m => m._id === decodedText);
+  // Funciones para manejar el resultado del scanner
+  const handleScanSuccess = (result: string) => {
+    const decodedText = result;
+    setIsScannerOpen(false); // Cerrar modal del scanner
+    
+    const foundMuestra = todasLasMuestras.find(m => m._id === decodedText);
 
-      if (foundMuestra) {
-        setScannedMuestra(foundMuestra); // Abrir modal de edición
-      } else {
-        toast.error("Muestra no encontrada. El QR no es válido.");
-      }
-    }
-
-    if (error) {
-      // Opcional: manejar errores, pero usualmente no es necesario
-      // console.info(error);
+    if (foundMuestra) {
+      setScannedMuestra(foundMuestra); // Abrir modal de edición
+    } else {
+      toast.error("Muestra no encontrada. El QR no es válido.");
     }
   };
 
-  const puedeEscanear = hasPermission("EditarMuestra"); // Asegúrate que el permiso sea "EditarMuestra"
+  const handleScanError = (error: unknown) => {
+    console.error("Error de QR Scanner:", error);
+
+    if (error instanceof Error) {
+        if (error.name === "NotAllowedError") {
+            toast.error("Acceso a la cámara denegado.");
+        } else {
+            toast.error("Error del scanner: " + error.message);
+        }
+    } else {
+        toast.error("Error desconocido del scanner.");
+    }
+    
+    // Cierra el scanner si falla
+    setIsScannerOpen(false);
+  };
+
+  const puedeEscanear = hasPermission("EditarMuestra");
 
   if (!isClient || !isLoaded || !puedeEscanear) {
     return null;
@@ -122,21 +131,23 @@ export function ScanMuestraButton({ todasLasMuestras }: ScanMuestraButtonProps) 
         Escanear Muestra
       </Button>
 
-      {/* --- MODAL DEL SCANNER --- */}
       <Dialog open={isScannerOpen} onOpenChange={setIsScannerOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Escanear QR de la Muestra</DialogTitle>
           </DialogHeader>
           
-          {/* 3. El componente <QrReader> se renderiza aquí */}
-          {/* Solo lo montamos si el modal está abierto, para que pida la cámara al instante */}
           {isScannerOpen && (
-            <QrReader
-              onResult={handleScanResult}
-              constraints={{ facingMode: "environment" }} // Usa la cámara trasera
-              containerStyle={{ width: '100%' }}
-            />
+            <div className="overflow-hidden rounded-md">
+              <QrScanner
+                onDecode={handleScanSuccess}
+                onError={handleScanError}
+                constraints={{
+                  facingMode: "environment"
+                }}
+                scanDelay={1000}
+              />
+            </div>
           )}
 
           <DialogFooter>
@@ -145,7 +156,6 @@ export function ScanMuestraButton({ todasLasMuestras }: ScanMuestraButtonProps) 
         </DialogContent>
       </Dialog>
 
-      {/* --- MODAL DE EDICIÓN (idéntico al anterior) --- */}
       <Dialog open={!!scannedMuestra} onOpenChange={(open) => !open && setScannedMuestra(null)}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Editar Muestra (Escaneada)</DialogTitle></DialogHeader>

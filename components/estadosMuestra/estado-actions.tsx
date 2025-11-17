@@ -53,6 +53,7 @@ export function EstadoActions({ estado }: EstadoActionsProps) {
       toast.success("Estado actualizado.");
       setIsEditDialogOpen(false);
     } catch (error) {
+      console.error(error);
       toast.error("Error al actualizar el estado.");
     }
   };
@@ -62,6 +63,7 @@ export function EstadoActions({ estado }: EstadoActionsProps) {
       await deleteEstado({ id: estado._id });
       toast.success("Estado eliminado.");
     } catch (error) {
+      console.error(error);
       toast.error("Error al eliminar el estado.");
     }
   };

@@ -29,7 +29,6 @@ export function RegisterMestraButton() {
   const [clienteSearch, setClienteSearch] = useState("");
   const [analisisSearch, setAnalisisSearch] = useState("");
   
-  // 2. Añadir el estado 'isClient'
   const [isClient, setIsClient] = useState(false);
   
   const clientes = useQuery(api.clientes.getClientes);
@@ -38,7 +37,6 @@ export function RegisterMestraButton() {
 
   const createMuestra = useMutation(api.muestras.createMuestra);
 
-  // 3. Añadir el useEffect para actualizar 'isClient' solo en el navegador
   useEffect(() => {
     setIsClient(true);
   }, []);
@@ -88,14 +86,12 @@ export function RegisterMestraButton() {
   
   const isLoadingData = !clientes || !analisis || !estados;
 
-  //Consultar permisos
   const puedeRegistrar = hasPermission("RegistrarMuestra");
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
 
-        {/* 4. Modificar la condición para incluir 'isClient' */}
         { isClient && puedeRegistrar && (
           <Button><PlusCircle className="h-4 w-4 mr-2" />Registrar Muestra</Button>
         )}

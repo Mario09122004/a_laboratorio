@@ -82,6 +82,7 @@ export function ClientActions({ cliente }: ClientActionsProps) {
       toast.success("Cliente actualizado.");
       setIsEditDialogOpen(false);
     } catch (error) {
+      console.error(error);
       toast.error("Error al actualizar el cliente.");
     }
   };
@@ -91,6 +92,7 @@ export function ClientActions({ cliente }: ClientActionsProps) {
       await deleteCliente({ id: cliente._id });
       toast.success("Cliente eliminado.");
     } catch (error) {
+      console.error(error);
       toast.error("Error al eliminar el cliente.");
     }
   };

@@ -116,20 +116,16 @@ export function MuestraActions({ muestra }: MuestraActionsProps) {
   const puedeEditar = hasPermission("EditarMuestra");
   const puedeVerDetalles = hasPermission("VerDetallesMuestra");
   const puedeVerNotas = hasPermission("VerNotasMuestras");
-  // 2. Nuevo permiso para QR, o reutilizamos `puedeVerDetalles`
-  const puedeVerQR = hasPermission("VerDetallesMuestra"); // Puedes crear un permiso específico si lo necesitas
+  const puedeVerQR = hasPermission("VerDetallesMuestra");
 
   return (
     <>
       {isClient && puedeVerDetalles && (
         <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-          {/* 3. Aumentar el tamaño del Dialog para el QR si es necesario */}
           <DialogContent className="sm:max-w-3xl"> 
             <DialogHeader><DialogTitle>Detalles de la Muestra</DialogTitle><DialogDescription>Información completa de la muestra registrada para {muestra.clienteNombre}.</DialogDescription></DialogHeader>
             
-            {/* 4. Contenedor para el QR y los detalles */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
-              {/* Columna de detalles (primera columna) */}
               <div className="md:col-span-2 grid gap-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div><h4 className="text-sm font-semibold text-muted-foreground">Cliente</h4><p>{muestra.clienteNombre}</p></div>
@@ -156,16 +152,15 @@ export function MuestraActions({ muestra }: MuestraActionsProps) {
                 </div>
               </div>
 
-              {/* Columna del QR (segunda columna) */}
               {isClient && puedeVerQR && (
                 <div className="flex flex-col items-center justify-center border rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
                   <h4 className="text-md font-semibold text-muted-foreground mb-4">ID de Muestra QR</h4>
                   <QRCodeSVG 
-                    value={muestra._id} // El ID de la muestra es el valor del QR
+                    value={muestra._id}
                     size={180}
-                    level={"H"} // Nivel de corrección de error (High)
+                    level={"H"}
                     includeMargin={false}
-                    className="p-2 bg-white rounded-md" // Estilo para el QR
+                    className="p-2 bg-white rounded-md"
                   />
                   <p className="mt-4 text-sm text-center text-muted-foreground break-all">ID: {muestra._id}</p>
                 </div>

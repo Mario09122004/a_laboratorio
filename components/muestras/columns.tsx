@@ -5,12 +5,11 @@ import { Doc } from "@/convex/_generated/dataModel";
 import { MuestraActions } from "./muestra-actions";
 import { Badge } from "@/components/ui/badge";
 
-// El tipo ahora debe incluir analisisNombre
 type MuestraConDetalles = Doc<"Muestras"> & {
   clienteNombre: string;
   estadoNombre: string;
   estadoColor: string;
-  analisisNombre: string; // <-- Asegúrate de que tu tabla Muestras tenga este campo
+  analisisNombre: string;
 };
 
 export const columns: ColumnDef<MuestraConDetalles>[] = [
@@ -19,7 +18,7 @@ export const columns: ColumnDef<MuestraConDetalles>[] = [
     header: "Cliente",
   },
   {
-    accessorKey: "analisisNombre", // <-- Nueva columna
+    accessorKey: "analisisNombre",
     header: "Tipo de Análisis",
   },
   {

@@ -54,6 +54,7 @@ export function RegisterAnalisisButton() {
       form.reset();
       setIsOpen(false);
     } catch (error) {
+      console.error(error);
       toast.error("Hubo un error al registrar el análisis.");
     }
   };

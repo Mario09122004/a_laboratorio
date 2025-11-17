@@ -59,51 +59,52 @@ export function MuestrasPage() {
 
   return (
     <div className="container mx-auto py-8">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
         <h1 className="text-3xl font-bold tracking-tight">Gestión de Muestras</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
           <ScanMuestraButton todasLasMuestras={todasLasMuestras ?? []} />
           <RegisterMestraButton /> 
         </div>
       </div>
-
-      <div className="flex flex-col md:flex-row gap-2 items-center p-4 border rounded-lg mb-6">
+      <div className="flex flex-col md:flex-row gap-2 md:items-center p-4 border rounded-lg mb-6">
         <Input
           placeholder="Filtrar por cliente..."
           value={clienteInput}
           onChange={(e) => setClienteInput(e.target.value)}
-          className="flex-1"
+          className="w-full md:flex-1"
         />
-        <Select value={estadoInput} onValueChange={setEstadoInput}>
-          <SelectTrigger className="flex-1">
-            <SelectValue placeholder="Filtrar por estado..." />
-          </SelectTrigger>
-          <SelectContent>
-            {estados?.map((e) => (
-              <SelectItem key={e._id} value={e._id}>
-                <div className="flex items-center gap-2">
-                  <div className="h-3 w-3 rounded-full border" style={{ backgroundColor: e.color }} />
-                  <span>{e.estado}</span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="w-full md:flex-1">
+          <Select value={estadoInput} onValueChange={setEstadoInput}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Filtrar por estado..." />
+            </SelectTrigger>
+            <SelectContent>
+              {estados?.map((e) => (
+                <SelectItem key={e._id} value={e._id}>
+                  <div className="flex items-center gap-2">
+                    <div className="h-3 w-3 rounded-full border" style={{ backgroundColor: e.color }} />
+                    <span>{e.estado}</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         
         <DatePicker
           date={fechaInicioInput}
           setDate={setFechaInicioInput}
           placeholder="Fecha de inicio"
-          className="flex-1"
+          className="w-full md:flex-1"
         />
         <DatePicker
           date={fechaFinInput}
           setDate={setFechaFinInput}
           placeholder="Fecha de fin"
-          className="flex-1"
+          className="w-full md:flex-1"
         />
 
-        <Button onClick={limpiarFiltros} variant="ghost" className="shrink-0">
+        <Button onClick={limpiarFiltros} variant="ghost" className="w-full md:w-auto shrink-0">
           <X className="h-4 w-4 mr-2" />
           Limpiar
         </Button>

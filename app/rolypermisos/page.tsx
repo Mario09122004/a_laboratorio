@@ -62,21 +62,25 @@ function UserList({ users, roles }: { users: (Doc<"Usuarios"> & { roleName: stri
       </CardHeader>
       <CardContent className="space-y-4">
         {paginatedUsers.map((user) => (
-          <div key={user._id} className="flex items-center justify-between p-2 border rounded-md">
-            <div>
-              <p className="font-medium">{user.nombreCompleto}</p>
-              <p className="text-sm text-muted-foreground">{user.correo}</p>
+          <div key={user._id} className="flex items-center justify-between space-x-4 p-2 border rounded-md">
+            
+            <div className="flex-1 min-w-0">
+              <p className="font-medium truncate" title={user.nombreCompleto}>{user.nombreCompleto}</p>
+              <p className="text-sm text-muted-foreground truncate" title={user.correo}>{user.correo}</p>
             </div>
-            <Select onValueChange={(roleId) => handleRoleChange(user._id, roleId)} defaultValue={user.rol}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Asignar rol..." />
-              </SelectTrigger>
-              <SelectContent>
-                {roles.map((role) => (
-                  <SelectItem key={role._id} value={role._id}>{role.nombre}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            
+            <div className="flex-shrink-0"> 
+              <Select onValueChange={(roleId) => handleRoleChange(user._id, roleId)} defaultValue={user.rol}>
+                <SelectTrigger className="w-[130px] md:w-[180px]">
+                  <SelectValue placeholder="Asignar rol..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {roles.map((role) => (
+                    <SelectItem key={role._id} value={role._id}>{role.nombre}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         ))}
         <div className="flex justify-between items-center pt-4">
